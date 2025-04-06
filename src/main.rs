@@ -1,6 +1,7 @@
 use image::ImageReader;
 use ravif::*;
 use rgb::FromSlice;
+use std::fs;
 use std::{fmt::format, path::PathBuf};
 use walkdir::WalkDir;
 
@@ -16,7 +17,8 @@ fn main() -> anyhow::Result<()> {
         let output_base_dir = output_root.join(f.file_stem().unwrap());
         max_widths.iter().for_each(|w| {
             let output_path = output_base_dir.join(format!("{}w.avif", w));
-            println!("{}", output_path.display());
+            let _ = make_avif(&f, &output_path);
+            // println!("{}", output_path.display());
         });
 
         // println!("Input File: {}", f.display());
@@ -48,16 +50,41 @@ fn get_files_with_extensions(dir: &PathBuf, extensions: &Vec<&str>) -> Vec<PathB
 }
 
 fn make_avif(input_path: &PathBuf, output_path: &PathBuf) -> anyhow::Result<()> {
-    let img_file = ImageReader::open(input_path)?.decode()?;
-    let img = Img::new(
-        img_file.as_bytes().as_rgba(),
-        img_file.width() as usize,
-        img_file.height() as usize,
-    );
-    let res = Encoder::new()
-        .with_quality(70.)
-        .with_speed(4)
-        .encode_rgba(img)?;
-    std::fs::write(output_path, res.avif_file)?;
+    match output_path.parent() {
+        Some(parent_dir) => match fs::create_dir_all(parent_dir) {
+            Ok(_) => {
+                dbg!(&output_path);
+                let img_file = ImageReader::open(input_path)?.decode()?;
+                let img = Img::new(
+                    img_file.as_bytes().as_rgb(),
+                    img_file.width() as usize,
+                    img_file.height() as usize,
+                );
+                let res = Encoder::new()
+                    .with_quality(70.)
+                    .with_speed(4)
+                    .encode_rgb(img)?;
+                std::fs::write(output_path, res.avif_file)?;
+            }
+            Err(e) => {
+                dbg!(e);
+                ()
+            }
+        },
+        None => println!("something went wrong"),
+    }
+
+    // let img_file = ImageReader::open(input_path)?.decode()?;
+    // let img = Img::new(
+    //     img_file.as_bytes().as_rgba(),
+    //     img_file.width() as usize,
+    //     img_file.height() as usize,
+    // );
+    // let res = Encoder::new()
+    //     .with_quality(70.)
+    //     .with_speed(4)
+    //     .encode_rgba(img)?;
+    // std::fs::write(output_path, res.avif_file)?;
+
     Ok(())
 }
