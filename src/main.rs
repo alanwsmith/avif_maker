@@ -6,9 +6,12 @@ use std::path::PathBuf;
 use walkdir::WalkDir;
 
 fn main() -> anyhow::Result<()> {
-    // let input_dir = PathBuf::from("/Users/alan/Documents/Neopoligen/alanwsmith.com/images");
-    let input_dir =
-        PathBuf::from("/Users/alan/Documents/Neopoligen/alanwsmith.com/avif_test_images");
+    let debug = true;
+    let input_dir = if debug {
+        PathBuf::from("/Users/alan/Documents/Neopoligen/alanwsmith.com/avif_test_images")
+    } else {
+        PathBuf::from("/Users/alan/Documents/Neopoligen/alanwsmith.com/images")
+    };
     let output_root = PathBuf::from("/Users/alan/Documents/Neopoligen/alanwsmith.com/cache/images");
     let extensions = vec!["jpg", "png", "jpeg"];
     let max_widths = vec![100, 200, 300, 400];
