@@ -4,11 +4,20 @@ use rgb::FromSlice;
 use std::path::PathBuf;
 use walkdir::WalkDir;
 
-fn main() {
+fn main() -> anyhow::Result<()> {
     let input_dir = PathBuf::from("/Users/alan/Documents/Neopoligen/alanwsmith.com/images");
+    let output_root = PathBuf::from("/Users/alan/Documents/Neopoligen/alanwsmith.com/cache/images");
     let extensions = vec!["jpg", "png", "jpeg"];
     let source_files = get_files_with_extensions(&input_dir, &extensions);
-    dbg!(source_files);
+    source_files.iter().for_each(|f| {
+        let output_base_dir = output_root.join(f.file_stem().unwrap());
+        println!("Input File: {}", f.display());
+        println!("Output Base: {}", output_base_dir.to_string_lossy());
+
+        // println!("{}", f.file_name().unwrap().to_string_lossy());
+        // println!("{}", f.file_stem().unwrap().to_string_lossy());
+    });
+    Ok(())
 }
 
 fn get_files_with_extensions(dir: &PathBuf, extensions: &Vec<&str>) -> Vec<PathBuf> {
