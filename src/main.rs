@@ -14,7 +14,7 @@ fn main() -> anyhow::Result<()> {
     };
     let output_root = PathBuf::from("/Users/alan/Documents/Neopoligen/alanwsmith.com/cache/images");
     let extensions = vec!["jpg", "png", "jpeg"];
-    let max_widths = vec![100, 200, 300, 400];
+    let max_widths = vec![100, 200, 300, 400, 800, 1200, 1600, 2400, 3200];
     let source_files = get_files_with_extensions(&input_dir, &extensions);
     source_files.iter().for_each(|f| {
         let output_base_dir = output_root.join(f.file_stem().unwrap());
