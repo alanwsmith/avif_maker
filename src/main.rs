@@ -1,18 +1,26 @@
 use image::ImageReader;
 use ravif::*;
 use rgb::FromSlice;
-use std::path::PathBuf;
+use std::{fmt::format, path::PathBuf};
 use walkdir::WalkDir;
 
 fn main() -> anyhow::Result<()> {
-    let input_dir = PathBuf::from("/Users/alan/Documents/Neopoligen/alanwsmith.com/images");
+    // let input_dir = PathBuf::from("/Users/alan/Documents/Neopoligen/alanwsmith.com/images");
+    let input_dir =
+        PathBuf::from("/Users/alan/Documents/Neopoligen/alanwsmith.com/avif_test_images");
     let output_root = PathBuf::from("/Users/alan/Documents/Neopoligen/alanwsmith.com/cache/images");
     let extensions = vec!["jpg", "png", "jpeg"];
+    let max_widths = vec![100, 200];
     let source_files = get_files_with_extensions(&input_dir, &extensions);
     source_files.iter().for_each(|f| {
         let output_base_dir = output_root.join(f.file_stem().unwrap());
-        println!("Input File: {}", f.display());
-        println!("Output Base: {}", output_base_dir.to_string_lossy());
+        max_widths.iter().for_each(|w| {
+            let output_path = output_base_dir.join(format!("{}w.avif", w));
+            println!("{}", output_path.display());
+        });
+
+        // println!("Input File: {}", f.display());
+        // println!("Output Base: {}", output_base_dir.to_string_lossy());
 
         // println!("{}", f.file_name().unwrap().to_string_lossy());
         // println!("{}", f.file_stem().unwrap().to_string_lossy());
