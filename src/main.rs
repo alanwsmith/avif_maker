@@ -20,15 +20,7 @@ fn main() -> anyhow::Result<()> {
         let output_base_dir = output_root.join(f.file_stem().unwrap());
         max_widths.iter().for_each(|max_width| {
             let _ = make_avif(&f, &output_base_dir, *max_width);
-            // let output_path = output_base_dir.join(format!("{}w.avif", w));
-            // println!("{}", output_path.display());
         });
-
-        // println!("Input File: {}", f.display());
-        // println!("Output Base: {}", output_base_dir.to_string_lossy());
-
-        // println!("{}", f.file_name().unwrap().to_string_lossy());
-        // println!("{}", f.file_stem().unwrap().to_string_lossy());
     });
     Ok(())
 }
@@ -67,10 +59,8 @@ fn make_avif(
             };
             let output_height = img_file.height() * output_width / img_file.width();
             let output_path = output_base_dir.join(format!("{}w.avif", output_width));
-
             if !file_exists(&output_path) {
                 println!("Making: {}", output_path.display());
-
                 let resized_image = img_file.resize_to_fill(
                     output_width,
                     output_height,
@@ -95,19 +85,6 @@ fn make_avif(
             ()
         }
     }
-
-    // let img_file = ImageReader::open(input_path)?.decode()?;
-    // let img = Img::new(
-    //     img_file.as_bytes().as_rgba(),
-    //     img_file.width() as usize,
-    //     img_file.height() as usize,
-    // );
-    // let res = Encoder::new()
-    //     .with_quality(70.)
-    //     .with_speed(4)
-    //     .encode_rgba(img)?;
-    // std::fs::write(output_path, res.avif_file)?;
-
     Ok(())
 }
 
