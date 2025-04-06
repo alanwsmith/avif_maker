@@ -2,7 +2,7 @@ use image::ImageReader;
 use ravif::*;
 use rgb::FromSlice;
 use std::fs;
-use std::{fmt::format, path::PathBuf};
+use std::path::PathBuf;
 use walkdir::WalkDir;
 
 fn main() -> anyhow::Result<()> {
@@ -15,10 +15,9 @@ fn main() -> anyhow::Result<()> {
     let source_files = get_files_with_extensions(&input_dir, &extensions);
     source_files.iter().for_each(|f| {
         let output_base_dir = output_root.join(f.file_stem().unwrap());
-
-        max_widths.iter().for_each(|w| {
-            let output_path = output_base_dir.join(format!("{}w.avif", w));
-            let _ = make_avif(&f, &output_path, *w);
+        max_widths.iter().for_each(|max_width| {
+            let _ = make_avif(&f, &output_base_dir, *max_width);
+            // let output_path = output_base_dir.join(format!("{}w.avif", w));
             // println!("{}", output_path.display());
         });
 
@@ -50,42 +49,48 @@ fn get_files_with_extensions(dir: &PathBuf, extensions: &Vec<&str>) -> Vec<PathB
         .collect()
 }
 
-fn make_avif(input_path: &PathBuf, output_path: &PathBuf, max_width: u32) -> anyhow::Result<()> {
-    match output_path.parent() {
-        Some(parent_dir) => match fs::create_dir_all(parent_dir) {
-            Ok(_) => {
-                dbg!(&output_path);
-                let img_file = ImageReader::open(input_path)?.decode()?;
-                let output_width = if img_file.width() > max_width {
-                    max_width as u32
-                } else {
-                    img_file.width()
-                };
-                let output_height = img_file.height() * output_width / img_file.width();
+fn make_avif(
+    input_path: &PathBuf,
+    output_base_dir: &PathBuf,
+    max_width: u32,
+) -> anyhow::Result<()> {
+    //match output_path.parent() {
+    //   Some(parent_dir) =>
+    match fs::create_dir_all(output_base_dir) {
+        Ok(_) => {
+            let img_file = ImageReader::open(input_path)?.decode()?;
+            let output_width = if img_file.width() > max_width {
+                max_width as u32
+            } else {
+                img_file.width()
+            };
+            let output_height = img_file.height() * output_width / img_file.width();
+            let output_path = output_base_dir.join(format!("{}w.avif", output_width));
 
-                let resized_image = img_file.resize_to_fill(
-                    output_width,
-                    output_height,
-                    image::imageops::FilterType::Lanczos3,
-                );
+            println!("Making: {}", output_path.display());
 
-                let img = Img::new(
-                    resized_image.as_bytes().as_rgb(),
-                    resized_image.width() as usize,
-                    resized_image.height() as usize,
-                );
-                let res = Encoder::new()
-                    .with_quality(70.)
-                    .with_speed(4)
-                    .encode_rgb(img)?;
-                std::fs::write(output_path, res.avif_file)?;
-            }
-            Err(e) => {
-                dbg!(e);
-                ()
-            }
-        },
-        None => println!("something went wrong"),
+            let resized_image = img_file.resize_to_fill(
+                output_width,
+                output_height,
+                image::imageops::FilterType::Lanczos3,
+            );
+
+            let img = Img::new(
+                resized_image.as_bytes().as_rgb(),
+                resized_image.width() as usize,
+                resized_image.height() as usize,
+            );
+            let res = Encoder::new()
+                .with_quality(70.)
+                .with_speed(4)
+                .encode_rgb(img)?;
+            std::fs::write(output_path, res.avif_file)?;
+        }
+        Err(e) => {
+            dbg!(e);
+            ()
+        } // },
+          // None => println!("something went wrong"),
     }
 
     // let img_file = ImageReader::open(input_path)?.decode()?;
