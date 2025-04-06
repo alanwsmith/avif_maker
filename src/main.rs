@@ -11,13 +11,14 @@ fn main() -> anyhow::Result<()> {
         PathBuf::from("/Users/alan/Documents/Neopoligen/alanwsmith.com/avif_test_images");
     let output_root = PathBuf::from("/Users/alan/Documents/Neopoligen/alanwsmith.com/cache/images");
     let extensions = vec!["jpg", "png", "jpeg"];
-    let max_widths = vec![100, 200];
+    let max_widths = vec![100, 200, 300];
     let source_files = get_files_with_extensions(&input_dir, &extensions);
     source_files.iter().for_each(|f| {
         let output_base_dir = output_root.join(f.file_stem().unwrap());
+
         max_widths.iter().for_each(|w| {
             let output_path = output_base_dir.join(format!("{}w.avif", w));
-            let _ = make_avif(&f, &output_path);
+            let _ = make_avif(&f, &output_path, *w);
             // println!("{}", output_path.display());
         });
 
@@ -49,16 +50,29 @@ fn get_files_with_extensions(dir: &PathBuf, extensions: &Vec<&str>) -> Vec<PathB
         .collect()
 }
 
-fn make_avif(input_path: &PathBuf, output_path: &PathBuf) -> anyhow::Result<()> {
+fn make_avif(input_path: &PathBuf, output_path: &PathBuf, max_width: u32) -> anyhow::Result<()> {
     match output_path.parent() {
         Some(parent_dir) => match fs::create_dir_all(parent_dir) {
             Ok(_) => {
                 dbg!(&output_path);
                 let img_file = ImageReader::open(input_path)?.decode()?;
+                let output_width = if img_file.width() > max_width {
+                    max_width as u32
+                } else {
+                    img_file.width()
+                };
+                let output_height = img_file.height() * output_width / img_file.width();
+
+                let resized_image = img_file.resize_to_fill(
+                    output_width,
+                    output_height,
+                    image::imageops::FilterType::Lanczos3,
+                );
+
                 let img = Img::new(
-                    img_file.as_bytes().as_rgb(),
-                    img_file.width() as usize,
-                    img_file.height() as usize,
+                    resized_image.as_bytes().as_rgb(),
+                    resized_image.width() as usize,
+                    resized_image.height() as usize,
                 );
                 let res = Encoder::new()
                     .with_quality(70.)
