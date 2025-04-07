@@ -79,20 +79,31 @@ fn convert_rgb8(image_data: &image::DynamicImage, output_base_dir: &PathBuf) -> 
     Ok(())
 }
 
-// fn convert_rgba8(image_data: &image::DynamicImage, output_path: &PathBuf) -> anyhow::Result<()> {
-//     println!("Making: {}", output_path.display());
-//     let img = Img::new(
-//         image_data.as_bytes().as_rgba(),
-//         image_data.width() as usize,
-//         image_data.height() as usize,
-//     );
-//     let res = Encoder::new()
-//         .with_quality(70.)
-//         .with_speed(4)
-//         .encode_rgba(img)?;
-//     std::fs::write(output_path, res.avif_file)?;
-//     Ok(())
-// }
+fn convert_rgba8(
+    image_data: &image::DynamicImage,
+    output_base_dir: &PathBuf,
+) -> anyhow::Result<()> {
+    let output_path = output_base_dir.join(format!(
+        "{}.avif",
+        output_base_dir.file_stem().unwrap().display()
+    ));
+    if !file_exists(&output_path) {
+        println!("Making Image: {}", output_path.display());
+        let img = Img::new(
+            image_data.as_bytes().as_rgba(),
+            image_data.width() as usize,
+            image_data.height() as usize,
+        );
+        let res = Encoder::new()
+            .with_quality(70.)
+            .with_speed(4)
+            .encode_rgba(img)?;
+        std::fs::write(output_path, res.avif_file)?;
+    } else {
+        println!("Image Already Exists: {}", output_path.display());
+    }
+    Ok(())
+}
 
 fn make_avif(
     input_path: &PathBuf,
@@ -104,7 +115,7 @@ fn make_avif(
             let image_data = ImageReader::open(input_path)?.decode()?;
             match image_data.color() {
                 image::ColorType::Rgb8 => convert_rgb8(&image_data, output_base_dir),
-                // image::ColorType::Rgba8 => convert_rgba8(&image_data, output_base_dir),
+                image::ColorType::Rgba8 => convert_rgba8(&image_data, output_base_dir),
                 _ => {
                     println!("Hit Currently Unhandled ColorType - See Notes");
                     Ok(())
