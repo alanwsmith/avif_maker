@@ -15,13 +15,21 @@ site builder output.
 
 [] Add watcher
 
-[] Make sure rgb and rgba images 
-both work
+[] Do updates when images change even
+if the file name stays the same
 
-[] Make a default image output with 
-the raw size with no custom name
+[] Warn if multiple source images
+have the same name (and therefore
+output location)
 
 [] Show timing for images
 
 [] Write to a tmp file and do a rename
 to move the final file in place
+
+[x] Make sure rgb and rgba images 
+both work
+
+[x] Make a default image output with 
+the raw size with no custom name
+

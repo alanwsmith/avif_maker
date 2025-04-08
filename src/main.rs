@@ -25,7 +25,11 @@ fn main() -> anyhow::Result<()> {
         // TODO: Make the different sized images
         vec![200]
     };
-    let output_root = PathBuf::from("/Users/alan/Documents/Neopoligen/alanwsmith.com/cache/images");
+    let output_root = if !debug {
+        PathBuf::from("/Users/alan/Documents/Neopoligen/alanwsmith.com/cache/images")
+    } else {
+        PathBuf::from("/Users/alan/Documents/Neopoligen/alanwsmith.com/avif_test_images_output")
+    };
     let extensions = vec!["jpg", "png", "jpeg"];
     let source_files = get_files_with_extensions(&input_dir, &extensions);
     source_files.iter().for_each(|f| {
@@ -69,7 +73,7 @@ fn convert_rgb8(image_data: &image::DynamicImage, output_base_dir: &PathBuf) -> 
             image_data.height() as usize,
         );
         let res = Encoder::new()
-            .with_quality(70.)
+            .with_quality(60.)
             .with_speed(4)
             .encode_rgb(img)?;
         std::fs::write(output_path, res.avif_file)?;
@@ -95,7 +99,7 @@ fn convert_rgba8(
             image_data.height() as usize,
         );
         let res = Encoder::new()
-            .with_quality(70.)
+            .with_quality(60.)
             .with_speed(4)
             .encode_rgba(img)?;
         std::fs::write(output_path, res.avif_file)?;
