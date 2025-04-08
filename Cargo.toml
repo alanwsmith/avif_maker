@@ -1,0 +1,11 @@
+[package]
+name = "avif_maker"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+anyhow = "1.0.97"
+image = "0.25.6"
+ravif = "0.11.11"
+rgb = "0.8.50"
+walkdir = "2"
